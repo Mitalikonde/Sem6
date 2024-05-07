@@ -1,0 +1,492 @@
+DSBDA
+
+LAB 1
+
+#Import all the required Python Libraries. 
+
+import pandas as pd
+import numpy as np
+
+#Load dataset
+
+weather = pd.read_csv('weatherAUS.csv')
+
+#Data preprocessing
+
+#Checking for missing values
+missing_values = weather.isnull().sum()
+
+weather.describe()
+
+#Provide variable description
+
+var_description = weather.dtypes
+
+#Check Dimensions
+
+weather.shape
+
+#Turning Categorical Variables into Quantitative Variables
+
+weather = pd.get_dummies(weather, columns=['Sunshine'], drop_first=True)
+
+weather.head()
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+LAB 2 
+
+#importing python libraries
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Read the data from the CSV file
+
+data = pd.read_csv('data.csv')
+data.head()
+
+# 1. Scan all variables for missing values and inconsistencies. If there are missing values and/or inconsistencies, use any of the suitable techniques to deal with them.
+
+# Check for missing values
+
+data.isnull().sum()
+
+#Check for inconsistents
+
+data.describe()
+
+# fill missing values with the mean of the column on CGPA1 and CGPA2
+
+data['CGPA1'] = data['CGPA1'].fillna(data['CGPA1'].mean())
+data['CGPA2'] = data['CGPA2'].fillna(data['CGPA2'].mean())
+
+# 2. Scan all numeric variables for outliers. If there are outliers, use any of the suitable techniques to deal with them.
+
+# Check for outliers
+
+sns.boxplot(data['age'])
+plt.show()
+
+# look for outliers in the age column
+
+Q1 = data['age'].quantile(0.25)
+Q3 = data['age'].quantile(0.75)
+
+IQR = Q3 - Q1
+
+print("Q1: ", Q1)
+print("Q3: ", Q3)
+print("IQR: ", IQR)
+
+# print the number of outliers
+
+outliers = data[(data['age'] < (Q1 - 1.5 * IQR)) | (data['age'] > (Q3 + 1.5 * IQR))]
+print(outliers)
+
+# replace outliers with the mode
+
+data['age'] = data['age'].mask(data['age'] > Q3 + 1.5 * IQR, data['age'].mode()[0])
+data['age'] = data['age'].mask(data['age'] < Q1 - 1.5 * IQR, data['age'].mode()[0])
+
+print(data['age'])
+
+# 3. Apply data transformations on at least one of the variables. The purpose of this transformation should be one of the following reasons: to change the scale for better understanding of the variable, to convert a non-linear relation into a linear one, or to decrease the skewness and convert the distribution into a normal distribution.Reason and document your approach properly.The age column has a centered data. We can apply a log transformation to the age column to convert the distribution into a normal distribution.
+
+# log transformation
+
+data['age'] = data['age'].apply(lambda x: np.log(x) if x > 0 else 0)
+
+# display the transformed data
+
+print(data['age'])
+
+ #show age distribution after transformation in boxplot
+
+sns.boxplot(data['age'])
+plt.show()
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+LAB 3
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+import warnings
+warnings.filterwarnings('ignore')
+
+iris = sns.load_dataset('iris')
+
+iris.head()
+
+iris.describe()
+
+iris.describe(include='object')
+
+iris_groupby = iris.groupby(by='species')
+
+#Displaying Standard Deviation,Mean,Median,etc of the dataset
+iris_groupby.std()
+iris_groupby.mean()
+iris_groupby.min()
+iris_groupby.max()
+iris_groupby.median()
+iris_groupby.quantile()
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+LAB 4
+LINEAR REGRESSION
+
+#Import python libraries
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.linear_model import LinearRegression
+
+#Load the dataset and store it in a dataframe.
+
+df = pd.read_csv("BostonHousing.csv")
+
+df.head()
+
+X = df[['crim', 'zn', 'indus', 'chas', 'nox', 'rm', 'age', 'dis', 'rad', 'tax', 'ptratio', 'lstat']]
+Y = df['medv']
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X,Y, test_size = 0.3, random_state = 42)
+
+from sklearn.linear_model import LinearRegression
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+y_pred = lr.predict(X_test)
+
+print(y_pred)
+
+from sklearn.metrics import mean_squared_error
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+print("Root Mead squared Error is:")
+print(rmse)
+
+print("Training accuracy is:")
+lr.score(X_train, y_train)
+
+
+print("Testing accuracy is:")
+lr.score(X_test, y_test)
+----------------------------------------------------------------------------------------------------------------------------------------------------
+LAB 5
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+
+data = pd.read_csv('Social_Network_Ads.csv')
+
+data.head()
+
+data.info()
+
+data.describe
+
+data.shape
+
+data.isnull().sum()
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model Building
+model = LogisticRegression()
+
+# Feature Scaling
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Model Training
+model.fit(X_train_scaled, y_train)
+
+# Model Evaluation
+y_pred = model.predict(X_test_scaled)
+
+# Compute Confusion Matrix
+
+conf_matrix = confusion_matrix(y_test, y_pred)
+TN, FP, FN, TP = conf_matrix.ravel()
+print("\nTrue Positives (TP):", TP)
+print("False Positives (FP):", FP)
+print("True Negatives (TN):", TN)
+print("False Negatives (FN):", FN)
+
+print("Confusion Matrix:")
+print(conf_matrix)
+
+# Compute Accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy:", accuracy)
+error_rate = 1 - accuracy
+print("Error Rate:", error_rate)
+
+# Compute Precision
+precision = precision_score(y_test, y_pred)
+print("Precision:", precision)
+
+# Compute Recall
+recall = recall_score(y_test, y_pred)
+print("Recall:", recall)
+----------------------------------------------------------------------------------------------------------------------------------------------------
+LAB 6
+
+NAIVE BAYEES
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+
+df = pd.read_csv("iris.csv")
+df.info()
+
+df.shape
+
+df.isnull().sum()
+
+X = df[['sepal_length', 'sepal_width', 'petal_length', 'petal_width']]
+y = df['species']
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X,y, test_size = 0.3, random_state = 42)
+
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+
+model = GaussianNB()
+model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_predicted = model.predict(X_test)
+
+# Create the confusion matrix
+confusion_matrix = confusion_matrix(y_test, y_predicted)
+print("Confusion Matrix:\n", confusion_matrix)
+
+# Calculate evaluation metrics
+accuracy = accuracy_score(y_test, y_predicted)
+error_rate = 1 - accuracy
+precision = precision_score(y_test, y_predicted, average='weighted')
+recall = recall_score(y_test, y_predicted, average='weighted')
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+LAB 7
+
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk import pos_tag
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+
+#Note :  pip install nltk scikit-learn
+
+def preprocess_document(document):
+    # Tokenization
+    tokens = word_tokenize(document)
+    
+    # POS Tagging
+    pos_tags = pos_tag(tokens)
+    
+    # Stop words removal
+    stop_words = set(stopwords.words('english'))
+    filtered_tokens = [word for word in tokens if word.lower() not in stop_words]
+    
+    # Stemming
+    stemmer = PorterStemmer()
+    stemmed_tokens = [stemmer.stem(word) for word in filtered_tokens]
+    
+    # Lemmatization
+    lemmatizer = WordNetLemmatizer()
+    lemmatized_tokens = [lemmatizer.lemmatize(word) for word in filtered_tokens]
+    
+    return lemmatized_tokens
+
+def calculate_tf_idf(documents):
+    # Join preprocessed tokens into documents for TF-IDF calculation
+    preprocessed_documents = [' '.join(doc) for doc in documents]
+    
+    # Calculate TF-IDF
+    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_matrix = tfidf_vectorizer.fit_transform(preprocessed_documents)
+    
+    # Get feature names (terms)
+    feature_names = tfidf_vectorizer.get_feature_names_out()
+    
+    return tfidf_matrix, feature_names
+
+# Sample document
+sample_document = """
+Natural language processing (NLP) is a field of artificial intelligence 
+concerned with the interaction between computers and humans in natural 
+language. Tokenization is the process of splitting a text into words and 
+punctuation marks. POS tagging assigns parts of speech to each word in a 
+sentence. Stop words are common words that are often filtered out in text 
+analysis. Stemming reduces words to their root or base form. Lemmatization 
+is similar to stemming but produces valid words.
+"""
+
+# Preprocess the sample document
+preprocessed_tokens = preprocess_document(sample_document)
+
+# Calculate TF-IDF representation
+tfidf_matrix, feature_names = calculate_tf_idf([preprocessed_tokens])
+
+# Display TF-IDF representation
+import pandas as pd
+df_tfidf = pd.DataFrame(tfidf_matrix.toarray(), columns=feature_names)
+print("TF-IDF Representation:")
+print(df_tfidf)
+----------------------------------------------------------------------------------------------------------------------------------------------------
+LAB 8
+
+
+DATA VISUALIZATION 1
+
+1. Use the inbuilt dataset 'titanic'. The dataset contains 891 rows and contains information about the passengers 
+   who boarded the unfortunate Titanic ship. 
+   Use the Seaborn library to see if we canfind any patterns in the data.
+#importing python libraries
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt 
+# Load the dataset
+
+titanic = sns.load_dataset('titanic')
+titanic.info()
+titanic.shape
+titanic.describe()
+
+#DATA VISUALIZATION
+2. Write a code to check how the price of the ticket (column name: 'fare') for each passenger is distributed by plotting a histogram
+sns.histplot(x='fare',data=titanic)
+sns.set(rc={'figure.figsize':(5,5)})
+
+sns.displot(x='age',data=titanic,bins=70)
+sns.set(rc={'figure.figsize':(5,5)})
+
+sns.catplot(x='survived', data=titanic, kind='count', hue='pclass')
+sns.set(rc={'figure.figsize':(5,5)})
+
+ 
+----------------------------------------------------------------------------------------------------------------------------------------------------
+LAB 9
+
+
+DATA VISUALIZATION 2
+
+1. Use the inbuilt dataset 'titanic' as used in the above problem. 
+   Plot a box plot for distribution of age  with  respect to each gender along with  the information about whether they survived or  not. 
+   (Column names : 'sex' and 'age') 
+#importing python libraries
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt 
+# Load the dataset
+
+titanic = sns.load_dataset('titanic')
+titanic.head()
+
+2. Plot a box plot of the 'age' column with respect to 'sex' and 'survived'
+# Set the figure size
+plt.figure(figsize=(10,6))  
+sns.boxplot(x='sex', y='age', hue='survived', data=titanic)
+
+# Set the title of the plot
+plt.title('Box Plot of Age Distribution by Sex and Survival') 
+plt.show()
+
+OBSERVATIONS :
+
+Age Distribution:
+The box plot provides insights into the distribution of ages among male and female passengers.
+Overall, the median age for both genders appears to be around 28-30 years.
+    
+Gender Differences:
+In general, the age distribution for males tends to have a slightly higher median age compared to females.
+The box plot helps visualize any differences in age distribution between males and females.
+                                
+Survival Analysis:
+The box plot is segmented by survival status (survived vs. not survived) for each gender.
+We can observe differences in age distribution between passengers who survived and those who did not within each gender category.
+Among females, the median age of survivors seems slightly lower compared to non-survivors.
+----------------------------------------------------------------------------------------------------------------------------------------------------
+LAB 10
+
+
+DATA VISUALIZATION 3
+#importing python libraries
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt 
+# Load the dataset using pandas
+
+df = pd.read_csv('iris.csv')
+1. List down the features and their types (e.g., numeric, nominal) available in the dataset.
+
+2.Create a histogram for each feature in the dataset to illustrate the feature distributions
+fig, axes = plt.subplots(2, 2, figsize=(16, 8))
+
+axes[0,0].set_title("Distribution of Sepal Length")
+axes[0,0].hist(df["sepal_length"]);
+
+axes[0,1].set_title("Distribution of Sepal Width")
+axes[0,1].hist(df["sepal_width"]);
+
+axes[1,0].set_title("Distribution of Petal Length")
+axes[1,0].hist(df["petal_length"]);
+
+axes[1,1].set_title("Distribution of Petal Width")
+axes[1,1].hist(df["petal_width"]);
+
+3. Create a boxplot for each feature in the dataset. 
+fig, axes = plt.subplots(2, 2, figsize=(16,9))
+
+axes[0,0].set_title("Distribution of Sepal Length")
+sns.boxplot(  y="sepal_length", x= "species", data=df,  orient='v' , ax=axes[0, 0])
+
+axes[0,1].set_title("Distribution of Sepal Length")
+sns.boxplot(  y="sepal_width", x= "species", data=df,  orient='v' , ax=axes[0, 1])
+
+axes[1,0].set_title("Distribution of Sepal Length")
+sns.boxplot(  y="petal_length", x= "species", data=df,  orient='v' , ax=axes[1, 0])
+
+axes[1,1].set_title("Distribution of Sepal Length")
+sns.boxplot(  y="petal_width", x= "species", data=df,  orient='v' , ax=axes[1, 1])
+
+plt.show()
+
+4.Compare distributions and identify outliers. 
+sns.pairplot(df)
+plt.show()
+
+ 
